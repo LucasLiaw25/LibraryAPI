@@ -2,7 +2,9 @@ package com.liaw.dev.Library.mapper;
 
 import com.liaw.dev.Library.dto.UserDTO;
 import com.liaw.dev.Library.entity.User;
+import org.springframework.stereotype.Component;
 
+@Component
 public class UserMapper {
 
     public UserDTO toDTO(User user){

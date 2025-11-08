@@ -10,7 +10,6 @@ public class BookMapper {
     public BookDTO toDTO(Book book){
         return new BookDTO(
                 book.getId(),
-                book.getName(),
                 book.getTitle(),
                 book.getAuthor(),
                 book.getIsbn(),
@@ -23,7 +22,6 @@ public class BookMapper {
     public Book toEntity(BookDTO book){
         return new Book(
                 book.getId(),
-                book.getName(),
                 book.getTitle(),
                 book.getAuthor(),
                 book.getIsbn(),
