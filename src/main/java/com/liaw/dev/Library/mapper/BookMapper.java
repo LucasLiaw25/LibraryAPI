@@ -20,8 +20,8 @@ public class BookMapper {
         );
     }
 
-    public BookDTO toEntity(BookDTO book){
-        return new BookDTO(
+    public Book toEntity(BookDTO book){
+        return new Book(
                 book.getId(),
                 book.getName(),
                 book.getTitle(),
