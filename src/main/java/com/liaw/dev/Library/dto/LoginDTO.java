@@ -1,4 +1,4 @@
 package com.liaw.dev.Library.dto;
 
-public record LoginDTO() {
+public record LoginDTO(String email, String password) {
 }
