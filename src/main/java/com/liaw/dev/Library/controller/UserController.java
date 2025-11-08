@@ -1,10 +1,17 @@
 package com.liaw.dev.Library.controller;
 
+import com.liaw.dev.Library.dto.LoginDTO;
+import com.liaw.dev.Library.dto.TokenDTO;
 import com.liaw.dev.Library.dto.UserDTO;
+import com.liaw.dev.Library.entity.User;
+import com.liaw.dev.Library.service.TokenService;
 import com.liaw.dev.Library.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,11 +22,28 @@ import java.util.List;
 public class UserController {
 
     private final UserService service;
+    private final TokenService tokenService;
+    private final AuthenticationManager authenticationManager;
 
     @PostMapping
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO dto){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.createUser(dto));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<TokenDTO> login(@RequestBody LoginDTO dto){
+        UsernamePasswordAuthenticationToken userPass = new UsernamePasswordAuthenticationToken(
+                dto.email(), dto.password()
+        );
+
+        Authentication authenticate = authenticationManager.authenticate(userPass);
+        User user = (User) authenticate.getPrincipal();
+        String token = tokenService.generateToken(user);
+
+        return ResponseEntity.ok(
+                new TokenDTO(token)
+        );
     }
 
     @GetMapping
