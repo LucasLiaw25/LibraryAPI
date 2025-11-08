@@ -37,63 +37,16 @@ public class Loan {
     private LocalDate loanDate;
 
     @Column(name = "return_date")
-    private LocalDate returnDate = this.loanDate.plusWeeks(1);
+    private LocalDate returnDate;
     private LoanStatus status = LoanStatus.AVAILABLE;
 
-    public Loan(Long id, User user, Book book, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
-        this.id = id;
-        this.user = user;
-        this.book = book;
-        this.loanDate = loanDate;
-        this.returnDate = returnDate;
-        this.status = status;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Book getBook() {
-        return book;
-    }
-
-    public void setBook(Book book) {
-        this.book = book;
-    }
-
-    public LocalDate getLoanDate() {
-        return loanDate;
-    }
-
-    public void setLoanDate(LocalDate loanDate) {
-        this.loanDate = loanDate;
-    }
-
-    public LocalDate getReturnDate() {
-        return returnDate;
-    }
-
-    public void setReturnDate(LocalDate returnDate) {
-        this.returnDate = returnDate;
-    }
-
-    public LoanStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(LoanStatus status) {
-        this.status = status;
+    @PrePersist
+    protected void prePersist(){
+        if (this.loanDate == null){
+            this.loanDate = LocalDate.now();
+        }
+        if (this.returnDate == null){
+            this.returnDate = loanDate.plusWeeks(1);
+        }
     }
 }
