@@ -9,6 +9,7 @@ import com.liaw.dev.Library.repository.UserRepository;
 import com.liaw.dev.Library.validator.BookValidator;
 import com.liaw.dev.Library.validator.UserValidator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +19,13 @@ import java.util.List;
 public class UserService {
 
     private final UserMapper mapper;
+    private final PasswordEncoder encoder;
     private final UserValidator validator;
     private final UserRepository repository;
 
     public UserDTO createUser(UserDTO dto){
         User user = mapper.toEntity(dto);
+        user.setPassword(encoder.encode(user.getPassword()));
         repository.save(user);
         return mapper.toDTO(user);
     }
