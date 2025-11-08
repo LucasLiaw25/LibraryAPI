@@ -1,4 +1,4 @@
 package com.liaw.dev.Library.dto;
 
-public record JWTData() {
+public record JWTData(Long id, String name, String email) {
 }

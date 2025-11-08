@@ -1,4 +1,4 @@
 package com.liaw.dev.Library.dto;
 
-public record TokenDTO() {
+public record TokenDTO(String token) {
 }
