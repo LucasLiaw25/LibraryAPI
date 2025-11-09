@@ -2,6 +2,7 @@ package com.liaw.dev.Library.controller;
 
 import com.liaw.dev.Library.dto.LoanDTO;
 import com.liaw.dev.Library.dto.LoanRequest;
+import com.liaw.dev.Library.dto.ReturnRequest;
 import com.liaw.dev.Library.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,13 @@ public class LoanController {
     public ResponseEntity<LoanDTO> makeLoan(@RequestBody LoanRequest request){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.makeLoan(request.registration(), request.isbn()));
+    }
+
+    @PostMapping("/return")
+    public ResponseEntity<LoanDTO> returnBook(@RequestBody ReturnRequest request){
+        return ResponseEntity.ok(service.returnBook(
+                request.id(), request.registration(), request.isbn()
+        ));
     }
 
 }

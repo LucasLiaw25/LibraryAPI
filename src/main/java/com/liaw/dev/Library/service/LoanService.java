@@ -53,14 +53,25 @@ public class LoanService {
     }
 
     @Transactional
-    public void returnBook(String registration, String isbn){
-        validator.validateUserRequest(registration, isbn);
+    public LoanDTO returnBook(Long id, String registration, String isbn){
+        validator.validateReturn(id, registration, isbn);
+        Loan loan = repository.findById(id).get();
 
-        User user = userRepository.findByRegistration(registration).get();
-        Book book = bookRepository.findByIsbn(isbn).get();
+        User user = loan.getUser();
+        Book book = loan.getBook();
 
         book.setLoan(false);
+        book.setUser(null);
+        book.getLoans().remove(loan);
 
+        user.getBooks().remove(book);
+        loan.setStatus(LoanStatus.RETURNED);
+
+        repository.save(loan);
+        userRepository.save(user);
+        bookRepository.save(book);
+
+        return mapper.toDTO(loan);
     }
 
 }
