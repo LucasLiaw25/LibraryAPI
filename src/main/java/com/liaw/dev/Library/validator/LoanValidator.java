@@ -41,6 +41,16 @@ public class LoanValidator {
         }
     }
 
+    public void validateReturn(Long id, String registration, String isbn){
+        validateId(id);
+        validateUserRequest(registration, isbn);
+        Loan loan = repository.findById(id).get();
+
+        if (!loan.getUser().getRegistration().equals(registration) && !loan.getBook().getIsbn().equals(isbn)){
+            throw new RuntimeException("ISBN ou Registro não pertencem a esse empréstimo");
+        }
+    }
+
     public void validateLoan(String registration, String isbn){
         validateUserRequest(registration, isbn);
 

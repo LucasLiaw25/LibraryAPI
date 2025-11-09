@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +27,25 @@ public class UserService {
     public UserDTO createUser(UserDTO dto){
         User user = mapper.toEntity(dto);
         user.setPassword(encoder.encode(user.getPassword()));
+        user.setRegistration(generateRegistration());
         repository.save(user);
         return mapper.toDTO(user);
+    }
+
+    private String generateRegistration(){
+        Random random = new Random();
+        String text = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        int num1 = random.nextInt(10);
+        int num2 = random.nextInt(10);
+        int num3 = random.nextInt(10);
+
+        String registration = String.valueOf(text.charAt(random.nextInt(10)))
+                + String.valueOf(text.charAt(random.nextInt(10)))
+                + String.valueOf(text.charAt(random.nextInt(10)))
+                + num1 + num2 + num3;
+
+        return registration;
+
     }
 
     public List<UserDTO> listUsers(){
