@@ -22,5 +22,5 @@ public class LoanDTO {
     private Book book;
     private LocalDate loanDate;
     private LocalDate returnDate ;
-    private LoanStatus status = LoanStatus.AVAILABLE;
+    private LoanStatus status;
 }

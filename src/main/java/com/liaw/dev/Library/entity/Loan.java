@@ -38,7 +38,9 @@ public class Loan {
 
     @Column(name = "return_date")
     private LocalDate returnDate;
-    private LoanStatus status = LoanStatus.AVAILABLE;
+
+    @Enumerated(EnumType.STRING)
+    private LoanStatus status;
 
     @PrePersist
     protected void prePersist(){
