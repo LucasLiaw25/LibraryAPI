@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -24,42 +25,56 @@ public class User implements UserDetails {
     private String name;
     private String email;
     private String password;
-    private Integer registration;
+    private String registration;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user")
-    List<Book> books;
+    List<Book> books = new ArrayList<>();
 
     @JsonIgnore
     @OneToMany(mappedBy = "user")
-    private List<Loan> loans;
+    private List<Loan> loans = new ArrayList<>();
+
+    public void addBook(Book book){
+        getBooks().add(book);
+    }
+
+    public void removeBook(Book book){
+        getBooks().remove(book);
+    }
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
     }
 
     @Override
+    @JsonIgnore
     public String getUsername() {
         return this.getEmail();
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isAccountNonLocked() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isCredentialsNonExpired() {
         return true;
     }
 
     @Override
+    @JsonIgnore
     public boolean isEnabled() {
         return true;
     }

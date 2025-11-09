@@ -31,4 +31,12 @@ public class Book {
     @OneToMany
     private List<Loan> loans;
 
+    public void addLoan(Loan loan){
+        getLoans().add(loan);
+    }
+
+    public void removeLoan(Loan loan){
+        getLoans().remove(loan);
+    }
+
 }
