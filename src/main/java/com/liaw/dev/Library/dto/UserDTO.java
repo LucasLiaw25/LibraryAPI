@@ -21,4 +21,5 @@ public class UserDTO {
     private String registration;
     private List<Book> books;
     private List<Loan> loans;
+
 }
