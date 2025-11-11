@@ -1,6 +1,7 @@
 package com.liaw.dev.Library.validator;
 
 import com.liaw.dev.Library.entity.Book;
+import com.liaw.dev.Library.errors.BookErrors.BookNotFoundException;
 import com.liaw.dev.Library.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,7 @@ public class BookValidator {
         Optional<Book> book = repository.findById(id);
 
         if (book.isEmpty()){
-            throw new RuntimeException("Livro com id:" + id + " não encontrado.");
+            throw new BookNotFoundException("Livro não encontrado.");
         }
     }
 
