@@ -1,6 +1,7 @@
 package com.liaw.dev.Library.service;
 
 import com.liaw.dev.Library.dto.UserDTO;
+import com.liaw.dev.Library.dto.UserResponse;
 import com.liaw.dev.Library.entity.User;
 import com.liaw.dev.Library.mapper.BookMapper;
 import com.liaw.dev.Library.mapper.UserMapper;
@@ -48,15 +49,15 @@ public class UserService {
 
     }
 
-    public List<UserDTO> listUsers(){
+    public List<UserResponse> listUsers(){
         List<User> users = repository.findAll();
-        return users.stream().map(mapper::toDTO).toList();
+        return users.stream().map(mapper::toUserResponse).toList();
     }
 
-    public UserDTO findById(Long id){
+    public UserResponse findById(Long id){
         validator.validateId(id);
         User user = repository.findById(id).get();
-        return mapper.toDTO(user);
+        return mapper.toUserResponse(user);
     }
 
     public UserDTO updateUser(Long id, UserDTO dto){

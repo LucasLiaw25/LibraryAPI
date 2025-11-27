@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -22,6 +23,7 @@ public class Book {
     private String author;
     private String isbn;
     private Boolean loan = false;
+    private BigDecimal loanPrice;
 
     @ManyToOne
     @JoinColumn(name = "user_id")

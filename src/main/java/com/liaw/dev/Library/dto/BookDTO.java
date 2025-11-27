@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Data
@@ -21,6 +22,7 @@ public class BookDTO {
     private String author;
     private String isbn;
     private Boolean loan = false;
+    private BigDecimal loanPrice;
     private User user;
     private List<Loan> loans;
 }

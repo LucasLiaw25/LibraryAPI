@@ -2,6 +2,7 @@ package com.liaw.dev.Library.validator;
 
 import com.liaw.dev.Library.entity.Book;
 import com.liaw.dev.Library.entity.User;
+import com.liaw.dev.Library.errors.UserErrors.UserNotFoundException;
 import com.liaw.dev.Library.repository.BookRepository;
 import com.liaw.dev.Library.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +20,7 @@ public class UserValidator {
         Optional<User> user = repository.findById(id);
 
         if (user.isEmpty()){
-            throw new RuntimeException("Usuário com id:" + id + " não encontrado.");
+            throw new UserNotFoundException("Usuário não encontrado.");
         }
     }
 

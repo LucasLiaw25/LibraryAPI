@@ -3,6 +3,7 @@ package com.liaw.dev.Library.controller;
 import com.liaw.dev.Library.dto.LoginDTO;
 import com.liaw.dev.Library.dto.TokenDTO;
 import com.liaw.dev.Library.dto.UserDTO;
+import com.liaw.dev.Library.dto.UserResponse;
 import com.liaw.dev.Library.entity.User;
 import com.liaw.dev.Library.service.TokenService;
 import com.liaw.dev.Library.service.UserService;
@@ -47,12 +48,12 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<List<UserDTO>> listUser(){
+    public ResponseEntity<List<UserResponse>> listUser(){
         return ResponseEntity.ok(service.listUsers());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> findById(@PathVariable Long id){
+    public ResponseEntity<UserResponse> findById(@PathVariable Long id){
         return ResponseEntity.ok(service.findById(id));
     }
 

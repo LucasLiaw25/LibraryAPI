@@ -3,14 +3,14 @@ package com.liaw.dev.Library.controller;
 import com.liaw.dev.Library.dto.LoanDTO;
 import com.liaw.dev.Library.dto.LoanRequest;
 import com.liaw.dev.Library.dto.ReturnRequest;
+import com.liaw.dev.Library.pix.PixResponse;
 import com.liaw.dev.Library.service.LoanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,7 +20,7 @@ public class LoanController {
     private final LoanService service;
 
     @PostMapping
-    public ResponseEntity<LoanDTO> makeLoan(@RequestBody LoanRequest request){
+    public ResponseEntity<PixResponse> makeLoan(@RequestBody LoanRequest request){
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(service.makeLoan(request.registration(), request.isbn()));
     }
@@ -30,6 +30,16 @@ public class LoanController {
         return ResponseEntity.ok(service.returnBook(
                 request.id(), request.registration(), request.isbn()
         ));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<LoanDTO>> listLoan(){
+        return ResponseEntity.ok(service.listLoan());
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<LoanDTO>> listPendingLoan(){
+        return ResponseEntity.ok(service.listPendingLoan());
     }
 
 }

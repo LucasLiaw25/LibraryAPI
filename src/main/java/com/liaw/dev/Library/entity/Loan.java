@@ -1,6 +1,7 @@
 package com.liaw.dev.Library.entity;
 
 import com.liaw.dev.Library.enums.LoanStatus;
+import com.liaw.dev.Library.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +30,9 @@ public class Loan {
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus;
+
     @ManyToOne
     @JoinColumn(name = "book_id")
     private Book book;
@@ -42,6 +47,9 @@ public class Loan {
     @Enumerated(EnumType.STRING)
     private LoanStatus status;
 
+    private LocalDate userReturnDate;
+    private BigDecimal fineAmount;
+
     @PrePersist
     protected void prePersist(){
         if (this.loanDate == null){
@@ -51,4 +59,18 @@ public class Loan {
             this.returnDate = loanDate.plusWeeks(1);
         }
     }
+
+    public Loan(Long id,  User user, Book book, PaymentStatus paymentStatus, LocalDate loanDate, LocalDate returnDate, LoanStatus status) {
+        this.id = id;
+        this.user = user;
+        this.paymentStatus = paymentStatus;
+        this.book = book;
+        this.loanDate = loanDate;
+        this.returnDate = returnDate;
+        this.status = status;
+    }
+
+
+
+
 }

@@ -22,6 +22,7 @@ public class BookMapper {
                 book.getAuthor(),
                 book.getIsbn(),
                 book.getLoan(),
+                book.getLoanPrice(),
                 book.getUser(),
                 book.getLoans()
         );
@@ -45,6 +46,7 @@ public class BookMapper {
                 book.getAuthor(),
                 book.getIsbn(),
                 book.getLoan(),
+                book.getLoanPrice(),
                 book.getUser(),
                 book.getLoans()
         );

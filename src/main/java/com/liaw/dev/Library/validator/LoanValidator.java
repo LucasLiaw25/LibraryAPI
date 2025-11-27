@@ -3,6 +3,12 @@ package com.liaw.dev.Library.validator;
 import com.liaw.dev.Library.entity.Book;
 import com.liaw.dev.Library.entity.Loan;
 import com.liaw.dev.Library.entity.User;
+import com.liaw.dev.Library.errors.BookErrors.BookLoanException;
+import com.liaw.dev.Library.errors.BookErrors.BookNotFoundException;
+import com.liaw.dev.Library.errors.LoanErrors.LoanMaxException;
+import com.liaw.dev.Library.errors.LoanErrors.LoanNotFoundException;
+import com.liaw.dev.Library.errors.LoanErrors.LoanWrongException;
+import com.liaw.dev.Library.errors.UserErrors.UserNotFoundException;
 import com.liaw.dev.Library.repository.BookRepository;
 import com.liaw.dev.Library.repository.LoanRepository;
 import com.liaw.dev.Library.repository.UserRepository;
@@ -23,7 +29,7 @@ public class LoanValidator {
         Optional<Loan> loan = repository.findById(id);
 
         if (loan.isEmpty()){
-            throw new RuntimeException("Empréstimo com id:" + id + " não encontrado.");
+            throw new LoanNotFoundException("Empréstimo não encontrado.");
         }
     }
 
@@ -33,11 +39,11 @@ public class LoanValidator {
         Optional<User> find_user = userRepository.findByRegistration(registration);
 
         if (find_user.isEmpty()){
-            throw new RuntimeException("Usuário não encontrado");
+            throw new UserNotFoundException("Usuário não encontrado");
         }
 
         if (find_book.isEmpty()){
-            throw new RuntimeException("Livro não encontrado");
+            throw new BookNotFoundException("Livro não encontrado");
         }
     }
 
@@ -47,7 +53,7 @@ public class LoanValidator {
         Loan loan = repository.findById(id).get();
 
         if (!loan.getUser().getRegistration().equals(registration) && !loan.getBook().getIsbn().equals(isbn)){
-            throw new RuntimeException("ISBN ou Registro não pertencem a esse empréstimo");
+            throw new LoanWrongException("ISBN ou Registro não pertencem a esse empréstimo");
         }
     }
 
@@ -57,17 +63,10 @@ public class LoanValidator {
         Optional<Book> find_book = bookRepository.findByIsbn(isbn);
         Optional<User> find_user = userRepository.findByRegistration(registration);
 
-        if (find_user.isPresent()){
-            User user = find_user.get();
-            if (user.getBooks().size() == 3){
-                throw new RuntimeException("Limite de empréstimos atingido.");
-            }
-        }
-
         if (find_book.isPresent()){
             Book book = find_book.get();
             if (book.getLoan() == true){
-                throw new RuntimeException("Livro já emprestado. Aguarde o retorno do livro.");
+                throw new BookLoanException("Livro já emprestado. Aguarde o retorno do livro.");
             }
         }
     }

@@ -13,3 +13,9 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+efi:
+  pix:
+    client-id: ${client_id}
+    client-secret: ${client_secret}
+    certificate-path: ./certs/producao-853053-library.p12
+    sandbox-enabled: false
