@@ -3,10 +3,12 @@ package com.liaw.dev.Library.controller;
 import com.liaw.dev.Library.dto.LoanDTO;
 import com.liaw.dev.Library.dto.LoanRequest;
 import com.liaw.dev.Library.dto.ReturnRequest;
-import com.liaw.dev.Library.pix.PixResponse;
+import com.liaw.dev.Library.pix.PixDTO;
 import com.liaw.dev.Library.service.LoanService;
 import lombok.RequiredArgsConstructor;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +22,12 @@ public class LoanController {
     private final LoanService service;
 
     @PostMapping
-    public ResponseEntity<PixResponse> makeLoan(@RequestBody LoanRequest request){
+    public ResponseEntity makeLoan(@RequestBody LoanRequest request){
+        JSONObject pix = service.makeLoan(request.registration(), request.isbn());
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(service.makeLoan(request.registration(), request.isbn()));
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(pix.toString());
+
     }
 
     @PostMapping("/return")

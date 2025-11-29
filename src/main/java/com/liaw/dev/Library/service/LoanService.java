@@ -1,5 +1,6 @@
 package com.liaw.dev.Library.service;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.liaw.dev.Library.dto.LoanDTO;
 import com.liaw.dev.Library.entity.Book;
 import com.liaw.dev.Library.entity.Loan;
@@ -10,20 +11,19 @@ import com.liaw.dev.Library.errors.BookErrors.BookNotFoundException;
 import com.liaw.dev.Library.errors.LoanErrors.LoanMaxException;
 import com.liaw.dev.Library.errors.UserErrors.UserNotFoundException;
 import com.liaw.dev.Library.mapper.LoanMapper;
-import com.liaw.dev.Library.mapper.UserMapper;
 import com.liaw.dev.Library.pix.EfiPixService;
-import com.liaw.dev.Library.pix.PixResponse;
+import com.liaw.dev.Library.pix.PixDTO;
 import com.liaw.dev.Library.repository.BookRepository;
 import com.liaw.dev.Library.repository.LoanRepository;
 import com.liaw.dev.Library.repository.UserRepository;
 import com.liaw.dev.Library.validator.LoanValidator;
-import com.liaw.dev.Library.validator.UserValidator;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -41,7 +41,7 @@ public class LoanService {
     private final BigDecimal FINE_PER_DAY = new BigDecimal("2.00");
 
     @Transactional
-    public PixResponse makeLoan(String registration, String isbn){
+    public JSONObject makeLoan(String registration, String isbn){
         validator.validateLoan(registration, isbn);
         User user = userRepository.findByRegistration(registration)
                 .orElseThrow(()->new UserNotFoundException("Usuário não encontrado"));
@@ -51,6 +51,8 @@ public class LoanService {
         if(user.getBooks().size() == 3){
             throw new LoanMaxException("Limite de empréstimos atingido.");
         }
+        String valorFormatado = book.getLoanPrice().setScale(2, RoundingMode.HALF_UP).toString();
+        JSONObject pixResponseJson = pixService.pixCreateCharge(valorFormatado, user.getName(), user.getCpf());
 
         Loan loan = new Loan();
         loan.setBook(book);
@@ -58,9 +60,6 @@ public class LoanService {
         loan.setStatus(LoanStatus.PENDING);
         loan.setPaymentStatus(PaymentStatus.PENDING);
         repository.save(loan);
-
-        JSONObject pixResponseJson = pixService.createPixCode(book.getLoanPrice(), user.getName());
-        PixResponse pixResponse = mapPixResponse(pixResponseJson, loan.getId(), book.getLoanPrice());
 
         book.setLoan(true);
         book.setUser(user);
@@ -70,20 +69,7 @@ public class LoanService {
         userRepository.save(user);
         bookRepository.save(book);
 
-        return pixResponse;
-    }
-
-    private PixResponse mapPixResponse(JSONObject pixResponseJson, Long loanId, BigDecimal value){
-        String txid = pixResponseJson.getString("txid");
-        String pixCopieECola = pixResponseJson.getString("pixCopiaECola");
-
-        return PixResponse.builder()
-                .loanId(loanId)
-                .txid(txid)
-                .pixCopiaECola(pixCopieECola)
-                .value(value)
-                .build();
-
+        return pixResponseJson;
     }
 
     public List<LoanDTO> listLoan(){

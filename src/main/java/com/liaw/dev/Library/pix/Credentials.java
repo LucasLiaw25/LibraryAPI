@@ -1,15 +1,39 @@
 package com.liaw.dev.Library.pix;
 
 import lombok.Data;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
+import java.io.InputStream;
+
 @Data
 @Component
-@ConfigurationProperties(prefix = "efi.pix")
 public class Credentials {
     private String clientId;
     private String clientSecret;
-    private String certificatePath;
-    private Boolean sandboxEnabled;
+    private String certificate;
+    private Boolean sandbox;
+    private Boolean debug;
+
+    public Credentials(){
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream credentialsFile = classLoader.getResourceAsStream("credentials.json");
+        JSONTokener tokener = new JSONTokener(credentialsFile);
+        JSONObject credentials = new JSONObject(tokener);
+        try {
+            credentialsFile.close();
+        } catch (IOException e) {
+            System.out.println("Impossible to close file credentials.json");
+        }
+
+        this.certificate = credentials.getString("certificate");
+        this.sandbox = credentials.getBoolean("sandbox");
+        this.debug = credentials.getBoolean("debug");
+    }
+
+
+
 }

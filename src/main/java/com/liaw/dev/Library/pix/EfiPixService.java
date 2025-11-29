@@ -4,55 +4,91 @@ import br.com.efi.efisdk.EfiPay;
 import br.com.efi.efisdk.exceptions.EfiPayException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
 
-@Slf4j
 @Service
-@RequiredArgsConstructor
 public class EfiPixService {
 
-    private final Credentials credentials;
-    private final EfiPay efiClient;
+    @Value("${client_id}")
+    private String clientId;
 
-    public JSONObject listPixKey(){
-        Map<String, String> params = new HashMap<>();
-        Map<String, Object> body = new HashMap<>();
-        return executeOperation("pixListEvp", params, body);
-    }
+    @Value("${client_secret}")
+    private String clientSecret;
 
-    public JSONObject createPixCode(BigDecimal price, String name){
-        Map<String, Object> body = new HashMap<>();
-        String formattedPrice = String.format(Locale.US, "%.2f", price);
-        Map<String, Object> calendario = new HashMap<>();
-        calendario.put("expiracao", 3600);
-        body.put("calendario", calendario);
-        Map<String, Object> valor = new HashMap<>();
-        valor.put("original", formattedPrice);
-        body.put("valor", valor);
+    public JSONObject pixCreateCharge(String value, String name, String cpf){
+        Credentials credentials = new Credentials();
+        JSONObject options = configuration();
+
+        JSONObject body = new JSONObject();
+        body.put("calendario", new JSONObject().put("expiracao", 3600));
+        body.put("devedor", new JSONObject().put("cpf", cpf).put("nome", name));
+        body.put("valor", new JSONObject().put("original", value));
         body.put("chave", "lucasliaw50@gmail.com");
-        System.out.println(new File("./certs/libraryEfi.p12").getAbsolutePath());
-        return executeOperation("pixCreateImmediateCharge", new HashMap<>(), body);
-    }
+        body.put("solicitacaoPagador", "Cobrança dos serviços prestados.");
 
-    private JSONObject executeOperation(String operation, Map<String, String> params, Map<String, Object> body){
-        var retorno = new JSONObject();
+        JSONArray infoAdicionais = new JSONArray();
+        infoAdicionais.put(new JSONObject().put("nome", "Campo 1").put("valor", "Informação Adicional 1"));
+        body.put("infoAdicionais", infoAdicionais);
+
         try {
-            JSONObject response = efiClient.call(operation, params, new JSONObject(body));
-            log.info("Resultado: {}", response);
+            EfiPay efi = new EfiPay(options);
+            JSONObject response = efi.call("pixCreateImmediateCharge", new HashMap<String, String>(), body);
+            System.out.println(response);
+            int idFromJson = response.getJSONObject("loc").getInt("id");
+            generateQrCode(String.valueOf(idFromJson));
             return response;
         }catch (EfiPayException e){
-            log.error(e.getError());
-            retorno.put("error", e.getErrorDescription());
+            System.out.println(e.getError());
+            System.out.println(e.getErrorDescription());
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return null;
+    }
+
+    private void generateQrCode(String id){
+        JSONObject options = configuration();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("id", id);
+        try {
+            EfiPay efi= new EfiPay(options);
+            Map<String, Object> response = efi.call("pixGenerateQRCode", params, new HashMap<String, Object>());
+
+            System.out.println(response);
+
+            File outputfile = new File("qrCodeImage.png");
+            ImageIO.write(ImageIO.read(new ByteArrayInputStream(javax.xml.bind.DatatypeConverter.parseBase64Binary(((String) response.get("imagemQrcode")).split(",")[1]))), "png", outputfile);
+            Desktop desktop = Desktop.getDesktop();
+            desktop.open(outputfile);
+
+        }catch (EfiPayException e){
+            System.out.println(e.getError());
+            System.out.println(e.getErrorDescription());
         }
         catch (Exception e) {
-            retorno.put("erro", "não foi possível processar a requisição");
+            System.out.println(e.getMessage());
         }
-        return retorno;
+    }
+
+    private JSONObject configuration(){
+        Credentials credentials = new Credentials();
+        JSONObject options = new JSONObject();
+        options.put("client_id", clientId);
+        options.put("client_secret", clientSecret);
+        options.put("certificate", credentials.getCertificate());
+        options.put("sandbox", credentials.getSandbox());
+
+        return options;
     }
 
 }
