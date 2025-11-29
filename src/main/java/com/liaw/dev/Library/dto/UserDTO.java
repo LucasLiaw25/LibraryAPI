@@ -19,6 +19,7 @@ public class UserDTO {
     private String email;
     private String password;
     private String registration;
+    private String cpf;
     private List<Book> books;
     private List<Loan> loans;
 

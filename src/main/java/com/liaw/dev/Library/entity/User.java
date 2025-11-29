@@ -26,6 +26,7 @@ public class User implements UserDetails {
     private String email;
     private String password;
     private String registration;
+    private String cpf;
 
     @JsonIgnore
     @OneToMany(mappedBy = "user")

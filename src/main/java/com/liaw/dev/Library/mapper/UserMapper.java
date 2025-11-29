@@ -21,6 +21,7 @@ public class UserMapper {
                 user.getEmail(),
                 user.getPassword(),
                 user.getRegistration(),
+                user.getCpf(),
                 user.getBooks(),
                 user.getLoans()
         );
@@ -44,6 +45,7 @@ public class UserMapper {
                 user.getEmail(),
                 user.getPassword(),
                 user.getRegistration(),
+                user.getCpf(),
                 user.getBooks(),
                 user.getLoans()
         );
