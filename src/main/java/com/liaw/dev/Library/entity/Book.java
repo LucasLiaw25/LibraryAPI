@@ -30,7 +30,7 @@ public class Book {
     private User user;
 
     @JsonIgnore
-    @OneToMany
+    @OneToMany(mappedBy = "book")
     private List<Loan> loans;
 
     public void addLoan(Loan loan){

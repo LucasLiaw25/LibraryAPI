@@ -32,6 +32,7 @@ public class Loan {
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+    private String txid;
 
     @ManyToOne
     @JoinColumn(name = "book_id")

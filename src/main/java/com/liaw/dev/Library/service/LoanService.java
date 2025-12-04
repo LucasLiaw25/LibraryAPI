@@ -9,6 +9,7 @@ import com.liaw.dev.Library.enums.LoanStatus;
 import com.liaw.dev.Library.enums.PaymentStatus;
 import com.liaw.dev.Library.errors.BookErrors.BookNotFoundException;
 import com.liaw.dev.Library.errors.LoanErrors.LoanMaxException;
+import com.liaw.dev.Library.errors.LoanErrors.LoanNotFoundException;
 import com.liaw.dev.Library.errors.UserErrors.UserNotFoundException;
 import com.liaw.dev.Library.mapper.LoanMapper;
 import com.liaw.dev.Library.pix.EfiPixService;
@@ -19,6 +20,7 @@ import com.liaw.dev.Library.repository.UserRepository;
 import com.liaw.dev.Library.validator.LoanValidator;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,26 +50,21 @@ public class LoanService {
         Book book = bookRepository.findByIsbn(isbn)
                 .orElseThrow(()-> new BookNotFoundException("Livro não encontrado"));
 
-        if(user.getBooks().size() == 3){
+        if(user.getBooks().size() == 8){
             throw new LoanMaxException("Limite de empréstimos atingido.");
         }
         String valorFormatado = book.getLoanPrice().setScale(2, RoundingMode.HALF_UP).toString();
         JSONObject pixResponseJson = pixService.pixCreateCharge(valorFormatado, user.getName(), user.getCpf());
+        String txid = pixResponseJson.getString("txid");
 
         Loan loan = new Loan();
         loan.setBook(book);
         loan.setUser(user);
+        loan.setFineAmount(book.getLoanPrice());
         loan.setStatus(LoanStatus.PENDING);
         loan.setPaymentStatus(PaymentStatus.PENDING);
+        loan.setTxid(txid);
         repository.save(loan);
-
-        book.setLoan(true);
-        book.setUser(user);
-        book.getLoans().add(loan);
-        user.addBook(book);
-
-        userRepository.save(user);
-        bookRepository.save(book);
 
         return pixResponseJson;
     }
@@ -114,5 +111,47 @@ public class LoanService {
         return mapper.toDTO(loan);
     }
 
+    @Transactional
+    public String processPayment(String txid){
+        String status = pixService.checkPaymentStatus(txid);
+        if ("CONCLUIDA".equalsIgnoreCase(status)){
+            Loan loan = repository.findByTxid(txid)
+                    .orElseThrow(()-> new LoanNotFoundException("Empréstimo não encontrado para o txid informado."));
+            if (loan.getPaymentStatus() == PaymentStatus.PENDING){
+                loan.setPaymentStatus(PaymentStatus.PAID);
+                loan.setStatus(LoanStatus.ACTIVE);
+                Book book = bookRepository.findByIdWithLoans(loan.getBook().getId())
+                        .orElseThrow(()-> new BookNotFoundException("Livro não encontrado para o empréstimo."));
+                User user = userRepository.findByIdWithBooks(loan.getUser().getId())
+                        .orElseThrow(()-> new UserNotFoundException("Usuário não encontrado para o empréstimo."));
+
+                book.setLoan(true);
+                book.setUser(user);
+                book.getLoans().add(loan);
+                user.addBook(book);
+
+                userRepository.save(user);
+                bookRepository.save(book);
+                System.out.println("Pagamento confirmado");
+                return "Pagamento Confirmado. Empréstimo realizado com sucesso";
+            }else {
+                System.out.println("Empréstimo já estava feito");
+                return "Empréstimo já estava feito";
+            }
+        }else {
+            System.out.println("Pagamento pendente");
+            return "Pagamento ainda PENDENTE ou com ERRO.";
+        }
+    }
+
+    @Transactional
+    @Scheduled(fixedRate = 60000)
+    public void checkPendingPayment(){
+        System.out.println("-----Começando a análise de pagamentos pendentes-----");
+        List<Loan> pendingLoan = repository.findByPaymentStatus(PaymentStatus.PENDING);
+        for (Loan loan:pendingLoan){
+           this.processPayment(loan.getTxid());
+        }
+    }
 
 }

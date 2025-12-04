@@ -2,11 +2,13 @@ package com.liaw.dev.Library.pix;
 
 import br.com.efi.efisdk.EfiPay;
 import br.com.efi.efisdk.exceptions.EfiPayException;
+import com.liaw.dev.Library.entity.Loan;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
@@ -15,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.List;
 
 @Service
 public class EfiPixService {
@@ -90,5 +93,35 @@ public class EfiPixService {
 
         return options;
     }
+
+    public String checkPaymentStatus(String txid){
+        JSONObject options = configuration();
+        HashMap<String, String> params = new HashMap<>();
+        params.put("txid", txid);
+
+        try {
+            EfiPay efi = new EfiPay(options);
+            JSONObject response = efi.call("pixDetailCharge", params, new JSONObject());
+
+            if (response.has("pix")) {
+                JSONArray pixArray = response.getJSONArray("pix");
+
+                if (pixArray.length() > 0) {
+                    return "CONCLUIDA";
+                }
+            }
+
+            return "PENDENTE";
+
+        }catch (EfiPayException e){
+            System.out.println(e.getError());
+            System.out.println(e.getErrorDescription());
+            return "ERRO";
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+            return e.getMessage();
+        }
+    }
+
 
 }
